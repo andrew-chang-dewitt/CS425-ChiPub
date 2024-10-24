@@ -2,13 +2,19 @@ package org.iitcs.cli;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
+import org.jline.consoleui.elements.ConfirmChoice.ConfirmationValue;
 // import org.apache.logging.log4j.Level;
 // import org.apache.logging.log4j.core.config.Configurator;
 import org.jline.consoleui.prompt.ConsolePrompt;
 import org.jline.consoleui.prompt.PromptResultItemIF;
+import org.jline.consoleui.prompt.ConsolePrompt.UiConfig;
+import org.jline.consoleui.prompt.builder.ConfirmPromptBuilder;
+import org.jline.consoleui.prompt.builder.ListPromptBuilder;
 import org.jline.consoleui.prompt.builder.PromptBuilder;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
@@ -50,9 +56,7 @@ public class Cli {
             props.getVersion()
         );
         // build picocli command line from chipub root command
-        // use custom execution strategy to initialize things before exec
         this.cmd = new CommandLine(chipub);
-        // this.cmd.setExecutionStrategy(chipub::executionStrategy);
     }
 
     /**
@@ -78,7 +82,7 @@ public class Cli {
     mixinStandardHelpOptions = true,
     subcommands = {Search.class, View.class}
 )
-class ChiPub implements Runnable {
+class ChiPub implements Callable<Integer> {
     @Spec CommandSpec spec;
     @Option(
         names = { "--interactive" },
@@ -87,11 +91,6 @@ class ChiPub implements Runnable {
         fallbackValue = "true",
         description = "Run cli in interactive mode w/ menus & other prompts. Defaults to interactive mode; specify `--no-interactive` to disable interactive mode."
     ) boolean interactive;
-    // @Option(
-    //     names = { "-v", "--verbose" },
-    //     description = "Enable verbose mode. Increase verbosity by setting multiple times, e.g. `-vvv` or `--verbose --verbose --verbose`"
-    // )
-    // private boolean[] verbosity = new boolean[0];
 
     private String name;
     private String description;
@@ -104,73 +103,79 @@ class ChiPub implements Runnable {
     }
 
     @Override
-    public void run() {
+    public Integer call() {
         // prompt user with menu if interactive mode isn't disabled
         if ( interactive ) {
-            List<AttributedString> header = new ArrayList<>();
-            header.add(new AttributedStringBuilder()
-                    .append(name)
-                    .append(", version ")
-                    .append(version)
-                    .append("\n")
-                    .append(description)
-                    .append("\n")
-                    .append("\n")
-                    .toAttributedString());
-
-            try (Terminal terminal = TerminalBuilder.builder().build()) {
-                ConsolePrompt prompt = new ConsolePrompt(terminal);
-                PromptBuilder builder = prompt.getPromptBuilder();
-
-                // TODO: add more actions to main menu
-                builder.createListPrompt()
-                    .name("mainMenu")
-                    .message("What would you like to do?")
-                    .newItem("check-out")
-                    .text("Check out a book")
-                    .add()
-                    .newItem("check-in")
-                    .text("Check in a book")
-                    .add()
-                    .addPrompt();
-
-                Map<String, PromptResultItemIF> result = prompt.prompt(header, builder.build());
-                // TODO: make this direct user to appropriate handler
-                System.out.println("result = " + result);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            return interact();
         }
+
+        // otherwise, a subcommand is required.
+        throw new ParameterException(spec.commandLine(), "Specify a subcommand");
     };
 
-    // /**
-    //  * Custom execution strategty to set log level before proceeding to execute commands.
-    //  */
-    // public int executionStrategy(ParseResult parseResult) {
-    //     configureLogger();
+    /**
+     * Interactive menu for navigating application w/out using subcommands.
+     */
+    int interact() {
+        List<AttributedString> header = new ArrayList<>();
+        header.add(new AttributedStringBuilder()
+                .append(name)
+                .append(", version ")
+                .append(version)
+                .append("\n")
+                .append(description)
+                .append("\n")
+                .append("\n")
+                .toAttributedString());
 
-    //     return new CommandLine.RunLast().execute(parseResult);
-    // }
+        try (Terminal terminal = TerminalBuilder.builder().build()) {
+            UiConfig cfg = new ConsolePrompt.UiConfig(">", "( )", "(x)", "( )");
+            ConsolePrompt prompt = new ConsolePrompt(terminal, cfg);
 
-    // /**
-    //  * Configure log level from verbosity command
-    //  */
-    // private void configureLogger() {
-    //     // set log level from verbosity flag
-    //     Configurator.setRootLevel(calcLogLevel());
-    // }
+            PromptBuilder menuPrompt = menuBuilder(prompt);
+            Map<String, PromptResultItemIF> listResult = prompt.prompt(header, menuPrompt.build());
 
-    // /**
-    //  * Convert number of verbosity options given to log4j2 log level
-    //  */
-    // private Level calcLogLevel() {
-    //     switch (verbosity.length) {
-    //         case 0: return Level.WARN;
-    //         case 1: return Level.INFO;
-    //         case 2: return Level.DEBUG;
-    //         default: return Level.TRACE;
-    //     }
-    // }
+            PromptBuilder confirmPrompt = confirmBuilder(prompt, listResult.toString());
+            Map<String, PromptResultItemIF> confirmResult = prompt.prompt(confirmPrompt.build());
+
+            // TODO: make this direct user to appropriate handler
+            System.out.println("results:\n  list = " + listResult + "\n  confirm = " + confirmResult);
+            return 0;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return 1;
+        }
+    }
+
+    PromptBuilder menuBuilder(ConsolePrompt prompt) {
+        PromptBuilder builder = prompt.getPromptBuilder();
+        // TODO: add more actions to main menu
+        ListPromptBuilder menu = builder
+            .createListPrompt()
+            .name("mainMenu")
+            .message("Main Menu: What would you like to do?")
+            .newItem("check-out")
+            .text("Check out a book")
+            .add()
+            .newItem("check-in")
+            .text("Check in a book")
+            .add();
+        menu.addPrompt();
+
+        return builder;
+    }
+
+    PromptBuilder confirmBuilder(ConsolePrompt prompt, String prevResult) {
+        PromptBuilder builder = prompt.getPromptBuilder();
+        ConfirmPromptBuilder confirm = builder
+            .createConfirmPromp()
+            .name("confirm")
+            .message("you chose " + prevResult + ", is this correct?")
+            .defaultValue(ConfirmationValue.YES);
+        confirm.addPrompt();
+
+        return builder;
+    }
 
     /**
      * SUBCOMMANDS
@@ -230,12 +235,12 @@ class ChiPub implements Runnable {
 }
 
 @Command(name = "search", description = "Search for...", mixinStandardHelpOptions = true)
-class Search implements Runnable {
+class Search implements Callable<Integer> {
     @Spec CommandSpec spec;
 
     // first, the main function that defers all actions to subcommands
     @Override
-    public void run() {
+    public Integer call() {
         // TODO: maybe this actually can be run w/out subcommands, instead searching across all 3
         // types, but without any flags for narrowing...
         throw new ParameterException(spec.commandLine(), "Specify a subcommand");
@@ -248,7 +253,7 @@ class Search implements Runnable {
     // search for books
     @Command(name = "book", description = "books by a simple string, or by providing specific values for various properties, such as author, genre, isbn, etc")
     void book(
-        @Parameters(index = "0", paramLabel = "<search terms>") String query,
+        @Parameters(arity = "1..*", paramLabel = "<search terms>") String[] query,
         @Option(names = { "-a", "--author" }, description = "narrow search by author") String author,
         @Option(names = { "-g", "--genre" }, description = "narrow search by genre") String genre,
         @Option(names = { "-i", "--isbn" }, description = "narrow search by isbn") String isbn,
@@ -256,6 +261,7 @@ class Search implements Runnable {
         @Option(names = { "-s", "--subject" }, description = "narrow search by subject") String subject
     ) {
         // TODO...
+        System.out.println("searching for query: " + Arrays.toString(query));
     };
 
     // search for cardholders
@@ -271,12 +277,12 @@ class Search implements Runnable {
 }
 
 @Command(name = "view", description = "View information about...", mixinStandardHelpOptions = true)
-class View implements Runnable {
+class View implements Callable<Integer> {
     @Spec CommandSpec spec;
 
     // first, the main function that defers all actions to subcommands
     @Override
-    public void run() {
+    public Integer call() {
         throw new ParameterException(spec.commandLine(), "Specify a subcommand");
     };
 
