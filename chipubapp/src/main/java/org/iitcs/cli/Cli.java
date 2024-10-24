@@ -1,12 +1,75 @@
 package org.iitcs.cli;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+// import org.apache.logging.log4j.Level;
+// import org.apache.logging.log4j.core.config.Configurator;
+import org.jline.consoleui.prompt.ConsolePrompt;
+import org.jline.consoleui.prompt.PromptResultItemIF;
+import org.jline.consoleui.prompt.builder.PromptBuilder;
+import org.jline.terminal.Terminal;
+import org.jline.terminal.TerminalBuilder;
+import org.jline.utils.AttributedString;
+import org.jline.utils.AttributedStringBuilder;
+
+import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Parameters;
+import picocli.CommandLine.ParseResult;
 import picocli.CommandLine.Spec;
 
+import org.iitcs.util.PropertiesManager;
+
+/**
+ * Encapsulates everything needed to instantiate & execute the CLI program.
+ */
+public class Cli {
+    private static PropertiesManager props = PropertiesManager.getInstance();
+
+    private String[] args;
+    private CommandLine cmd;
+
+    /**
+     * Create a CLI application from {@link ChiPub} w/ given arguments.
+     *
+     * Parses args for some configuration options, then waits for exectuion using Cli::run().
+     */
+    public Cli(String ...args) {
+        // save args for execution time
+        this.args = args;
+        // create a new app using name, description, & version number from properties
+        ChiPub chipub = new ChiPub(
+            props.getName(),
+            props.getDescription(),
+            props.getVersion()
+        );
+        // build picocli command line from chipub root command
+        // use custom execution strategy to initialize things before exec
+        this.cmd = new CommandLine(chipub);
+        // this.cmd.setExecutionStrategy(chipub::executionStrategy);
+    }
+
+    /**
+     * Run the Cli application & receive an integer exit code where:
+     * - 0 => OK
+     * - 1 => Application error
+     * - 2 => User error
+     */
+    public int run() {
+        // execute command with args
+        return cmd.execute(args);
+    }
+}
+
+/**
+ * Root command for entire CLI program. Everything starts here.
+ */
 @Command(
     resourceBundle = "default_properties",
     name = "${bundle:name}",
@@ -15,18 +78,103 @@ import picocli.CommandLine.Spec;
     mixinStandardHelpOptions = true,
     subcommands = {Search.class, View.class}
 )
-public class Cli implements Runnable {
+class ChiPub implements Runnable {
     @Spec CommandSpec spec;
+    @Option(
+        names = { "--interactive" },
+        negatable = true,
+        defaultValue = "true", // Default to interactive mode
+        fallbackValue = "true",
+        description = "Run cli in interactive mode w/ menus & other prompts. Defaults to interactive mode; specify `--no-interactive` to disable interactive mode."
+    ) boolean interactive;
+    // @Option(
+    //     names = { "-v", "--verbose" },
+    //     description = "Enable verbose mode. Increase verbosity by setting multiple times, e.g. `-vvv` or `--verbose --verbose --verbose`"
+    // )
+    // private boolean[] verbosity = new boolean[0];
 
-    // first, the main function that defers all actions to subcommands
+    private String name;
+    private String description;
+    private String version;
+
+    public ChiPub(String name, String description, String version) {
+        this.name = name;
+        this.description = description;
+        this.version = version;
+    }
+
     @Override
     public void run() {
-        throw new ParameterException(spec.commandLine(), "Specify a subcommand");
+        // prompt user with menu if interactive mode isn't disabled
+        if ( interactive ) {
+            List<AttributedString> header = new ArrayList<>();
+            header.add(new AttributedStringBuilder()
+                    .append(name)
+                    .append(", version ")
+                    .append(version)
+                    .append("\n")
+                    .append(description)
+                    .append("\n")
+                    .append("\n")
+                    .toAttributedString());
+
+            try (Terminal terminal = TerminalBuilder.builder().build()) {
+                ConsolePrompt prompt = new ConsolePrompt(terminal);
+                PromptBuilder builder = prompt.getPromptBuilder();
+
+                // TODO: add more actions to main menu
+                builder.createListPrompt()
+                    .name("mainMenu")
+                    .message("What would you like to do?")
+                    .newItem("check-out")
+                    .text("Check out a book")
+                    .add()
+                    .newItem("check-in")
+                    .text("Check in a book")
+                    .add()
+                    .addPrompt();
+
+                Map<String, PromptResultItemIF> result = prompt.prompt(header, builder.build());
+                // TODO: make this direct user to appropriate handler
+                System.out.println("result = " + result);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     };
 
-    //
-    // SUBCOMMANDS
-    //
+    // /**
+    //  * Custom execution strategty to set log level before proceeding to execute commands.
+    //  */
+    // public int executionStrategy(ParseResult parseResult) {
+    //     configureLogger();
+
+    //     return new CommandLine.RunLast().execute(parseResult);
+    // }
+
+    // /**
+    //  * Configure log level from verbosity command
+    //  */
+    // private void configureLogger() {
+    //     // set log level from verbosity flag
+    //     Configurator.setRootLevel(calcLogLevel());
+    // }
+
+    // /**
+    //  * Convert number of verbosity options given to log4j2 log level
+    //  */
+    // private Level calcLogLevel() {
+    //     switch (verbosity.length) {
+    //         case 0: return Level.WARN;
+    //         case 1: return Level.INFO;
+    //         case 2: return Level.DEBUG;
+    //         default: return Level.TRACE;
+    //     }
+    // }
+
+    /**
+     * SUBCOMMANDS
+     */
 
     // check out a book
     @Command(name = "check-out", description = "Check out a book to a cardholder")

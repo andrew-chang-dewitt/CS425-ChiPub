@@ -1,20 +1,18 @@
 package org.iitcs;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.iitcs.cli.Cli;
-import org.iitcs.database.ChiPubConnection;
-import org.iitcs.database.QueriesManager;
-import org.iitcs.util.Constants.CRUD;
-
-import picocli.CommandLine;
-
-import org.iitcs.util.PropertiesManager;
-
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import org.iitcs.cli.Cli;
+import org.iitcs.database.ChiPubConnection;
+import org.iitcs.database.QueriesManager;
+import org.iitcs.util.Constants.CRUD;
+import org.iitcs.util.PropertiesManager;
 
 public class Main {
     private static final Logger LOGGER = LogManager.getLogger(Main.class);
@@ -22,8 +20,8 @@ public class Main {
     private static QueriesManager queries = QueriesManager.getInstance();
 
     public static void main(String... args) {
-        CommandLine cmd = new CommandLine(new Cli());
-        int exitCode = cmd.execute(args);
+        Cli cli = new Cli(args);
+        int exitCode = cli.run();
         System.exit(exitCode);
         // sampleCode();
     }

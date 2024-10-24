@@ -15,6 +15,9 @@ public class PropertiesManager {
     private String dbJdbcSchema;
     private String dbAdminUsername;
     private String dbAdminPassword;
+    private String name;
+    private String description;
+    private String version;
 
     /**
      * PropertiesManager is a singleton.
@@ -46,10 +49,16 @@ public class PropertiesManager {
         this.dbJdbcSchema = this.properties.getProperty("db.jdbc.schema");
         this.dbAdminUsername = this.properties.getProperty("db.admin.username");
         this.dbAdminPassword = this.properties.getProperty("db.admin.password");
+        this.name = this.properties.getProperty("name");
+        this.description = this.properties.getProperty("description");
+        this.version = this.properties.getProperty("version");
     }
 
     public String getDbJdbcUrl() { return dbJdbcUrl;}
     public String getDbJdbcSchema() { return dbJdbcSchema;}
     public String getDbAdminUsername() { return dbAdminUsername; }
     public String getDbAdminPassword() { return dbAdminPassword;}
+    public String getName() { return name;}
+    public String getDescription() { return description;}
+    public String getVersion() { return version;}
 }
