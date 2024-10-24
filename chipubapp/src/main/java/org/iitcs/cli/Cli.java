@@ -35,6 +35,15 @@ public class Cli implements Runnable {
         @Parameters(index = "1", paramLabel = "<member's card number>") int cardholderId
     ) {
         // TODO...
+        // validate params
+        // then call query from db code
+        // result ?
+        //   on success => return 0?
+        //   else       => handle error ?
+        //     if book already checked out,
+        //     or book subject to pending hold,
+        //     or cardholder has past due books still => return 1  // tell user
+        //     else                                   => return 10 // report unhandled error, maybe code will be something else?
     }
 
     // return a book
@@ -44,6 +53,13 @@ public class Cli implements Runnable {
         @Parameters(index = "1", paramLabel = "<member's card number>") int cardholderId
     ) {
         // TODO...
+        // validate params
+        // call db code
+        // result ?
+        //   success => return 0
+        //   else    => handle error ?
+        //     book not checked out => return 1  // tell user
+        //     unknown error        => return 10 // unhandled error
     }
 
     // request a hold
