@@ -9,12 +9,12 @@
 
     <groupId>org.iitcs</groupId>
     <artifactId>chipubapp</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.1</version>
 
     <properties>
       <app.main.class>org.iitcs.Main</app.main.class>
-      <java.version>11.0.25</java.version>
-      <jdk.version>17.0.13</jdk.version>
+      <java.version>11</java.version>
+      <jdk.version>17</jdk.version>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
       <maven.compiler.source>${java.version}</maven.compiler.source>
       <maven.compiler.target>${java.version}</maven.compiler.target>
