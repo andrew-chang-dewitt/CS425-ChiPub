@@ -9,13 +9,32 @@
 
     <groupId>org.iitcs</groupId>
     <artifactId>chipubapp</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.1-SNAPSHOT</version>
 
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+      <app.main.class>org.iitcs.Main</app.main.class>
+      <java.version>11.0.25</java.version>
+      <jdk.version>17.0.13</jdk.version>
+      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+      <maven.compiler.source>${java.version}</maven.compiler.source>
+      <maven.compiler.target>${java.version}</maven.compiler.target>
     </properties>
+
+    <developers>
+      <developer>
+        <id>andrew-chang-dewitt</id>
+        <name>Andrew Chang-DeWitt</name>
+        <url>andrew-chang-dewitt.dev</url>
+      </developer>
+      <developer>
+        <id>kelzzzz</id>
+        <name>Kels Cavin</name>
+      </developer>
+      <developer>
+        <id>PJCapuzzi</id>
+        <name>Peter Capuzzi</name>
+      </developer>
+    </developers>
 
     <build>
       <resources>
@@ -31,11 +50,116 @@
           <artifactId>exec-maven-plugin</artifactId>
           <version>3.5.0</version>
           <configuration>
-            <mainClass>org.iitcs.Main</mainClass>
+            <mainClass>${app.main.class}</mainClass>
           </configuration>
         </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.12.1</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.3.0</version>
+          <configuration>
+            <archive>
+              <manifest>
+                <mainClass>${app.main.class}</mainClass>
+              </manifest>
+            </archive>
+          </configuration>
+        </plugin>
+
+        <!-- TODO: figure out if these are still needed
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>appassembler-maven-plugin</artifactId>
+          <version>1.10</version>
+          <configuration>
+            <programs>
+              <program>
+                <mainClass>${app.main.class}</mainClass>
+                <id>iitcs</id>
+              </program>
+            </programs>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>3.7.1</version>
+          <configuration>
+            <attach>false</attach>
+            <appendAssemblyId>false</appendAssemblyId>
+            <descriptorRefs>
+              <descriptorRef>jar-with-dependencies</descriptorRef>
+            </descriptorRefs>
+          </configuration>
+        </plugin>
+        -->
       </plugins>
     </build>
+
+    <profiles>
+      <profile>
+        <id>jdks</id>
+        <build>
+          <defaultGoal>jdks:setup-disco</defaultGoal>
+          <plugins>
+            <plugin>
+              <groupId>org.jreleaser</groupId>
+              <artifactId>jdks-maven-plugin</artifactId>
+              <version>1.14.0</version>
+              <configuration>
+                <pkgs>
+                  <pkg>
+                    <name>zulu17LinuxMuslIntel</name>
+                    <platform>linux-x86_64</platform>
+                    <version>${jdk.version}</version>
+                    <libcType>musl</libcType>
+                    <archiveType>tar.gz</archiveType>
+                  </pkg>
+                  <pkg>
+                    <name>zulu17LinuxIntel</name>
+                    <platform>linux-x86_64</platform>
+                    <version>${jdk.version}</version>
+                  </pkg>
+                  <pkg>
+                    <name>zulu17OsxIntel</name>
+                    <platform>osx-x86_64</platform>
+                    <version>${jdk.version}</version>
+                  </pkg>
+                  <pkg>
+                    <name>zulu17WindowsIntel</name>
+                    <platform>windows-x86_64</platform>
+                    <version>${jdk.version}</version>
+                  </pkg>
+                  <pkg>
+                    <name>zulu17LinuxArm</name>
+                    <platform>linux-aarch64</platform>
+                    <version>${jdk.version}</version>
+                    <archiveType>tar.gz</archiveType>
+                  </pkg>
+                  <pkg>
+                    <name>zulu17OsxArm</name>
+                    <platform>osx-aarch64</platform>
+                    <version>${jdk.version}</version>
+                  </pkg>
+                  <pkg>
+                    <name>zulu17WindowsArm</name>
+                    <platform>windows-aarch64</platform>
+                    <version>${jdk.version}</version>
+                  </pkg>
+                </pkgs>
+              </configuration>
+            </plugin>
+          </plugins>
+        </build>
+      </profile>
+    </profiles>
 
     <dependencies>
         <dependency>
