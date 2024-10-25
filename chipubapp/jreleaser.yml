@@ -1,7 +1,7 @@
 environment:
   properties:
     jdkPathPrefix: 'target/jdks'
-    jdkFilePrefix: 'zulu17.32.13-ca-jdk17.0.2'
+    jdkFilePrefix: 'zulu17.54.21-ca-jdk17.0.13'
 
 project:
   name: chipub
