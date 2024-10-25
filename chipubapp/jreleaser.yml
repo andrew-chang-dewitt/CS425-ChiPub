@@ -36,20 +36,30 @@ assemble:
     chipubapp:
       active: ALWAYS
       imageName: '{{distributionName}}-{{projectVersion}}'
+        # jdeps:
+        #   ignoreMissingDeps: true
+      jars:
+        - pattern: '{{project.build.directory}}/repositories/universal/*.jar'
+        - pattern: '{{project.build.directory}}/repositories/osx/*.jar'
+          platform: 'osx-x86_64'
+        - pattern: '{{project.build.directory}}/repositories/windows/*.jar'
+          platform: 'windows-x86_64'
+        - pattern: '{{project.build.directory}}/repositories/linux/*.jar'
+          platform: 'linux-x86_64'
       targetJdks:
         - path: '{{jdkPathPrefix}}/zulu17OsxIntel/{{jdkFilePrefix}}-macosx_x64/zulu-17.jdk/Contents/Home'
           platform: 'osx-x86_64'
-        - path: '{{jdkPathPrefix}}/zulu17OsxArm/{{jdkFilePrefix}}-macosx_aarch64/zulu-17.jdk/Contents/Home'
-          platform: 'osx-aarch_64'
+            # - path: '{{jdkPathPrefix}}/zulu17OsxArm/{{jdkFilePrefix}}-macosx_aarch64/zulu-17.jdk/Contents/Home'
+            #   platform: 'osx-aarch_64'
         - path: '{{jdkPathPrefix}}/zulu17LinuxIntel/{{jdkFilePrefix}}-linux_x64'
           platform: 'linux-x86_64'
-        - path: '{{jdkPathPrefix}}/zulu17LinuxMuslIntel/{{jdkFilePrefix}}-linux_musl_x64'
-          platform: 'linux_musl-x86_64'
-        - path: '{{jdkPathPrefix}}/zulu17LinuxArm/{{jdkFilePrefix}}-linux_aarch64'
-          platform: 'linux-aarch_64'
+            # - path: '{{jdkPathPrefix}}/zulu17LinuxMuslIntel/{{jdkFilePrefix}}-linux_musl_x64'
+            #   platform: 'linux_musl-x86_64'
+            # - path: '{{jdkPathPrefix}}/zulu17LinuxArm/{{jdkFilePrefix}}-linux_aarch64'
+            #   platform: 'linux-aarch_64'
         - path: '{{jdkPathPrefix}}/zulu17WindowsIntel/{{jdkFilePrefix}}-win_x64'
           platform: 'windows-x86_64'
-        - path: '{{jdkPathPrefix}}/zulu17WindowsArm/{{jdkFilePrefix}}-win_aarch64'
-          platform: 'windows-aarch_64'
+            # - path: '{{jdkPathPrefix}}/zulu17WindowsArm/{{jdkFilePrefix}}-win_aarch64'
+            #   platform: 'windows-aarch_64'
       mainJar:
         path: 'target/{{distributionName}}-{{projectVersion}}.jar'
