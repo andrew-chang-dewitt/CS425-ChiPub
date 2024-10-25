@@ -9,7 +9,7 @@
 
     <groupId>org.iitcs</groupId>
     <artifactId>chipubapp</artifactId>
-    <version>0.1</version>
+    <version>0.1-SNAPSHOT</version>
 
     <properties>
       <app.main.class>org.iitcs.Main</app.main.class>
