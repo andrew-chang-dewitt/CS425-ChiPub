@@ -1,0 +1,55 @@
+environment:
+  properties:
+    jdkPathPrefix: 'target/jdks'
+    jdkFilePrefix: 'zulu17.32.13-ca-jdk17.0.2'
+
+project:
+  name: chipub
+  description: A small cli for interacting with the Chicago Public Library database system.
+  longDescription: A small cli for interacting with the Chicago Public Library database system.
+  links:
+    homepage: https://github.com/kelzzzz/CS425-ChiPub
+  authors:
+    - Kels Cavin
+    - Peter Capuzzi
+    - Andrew Chang-DeWitt
+  license: MIT
+  inceptionYear: 2024
+  stereotype: cli
+  java:
+    version: 11
+    groupId: org.iitcs
+    artifactId: chipubapp
+    mainClass: org.iitcs.Main
+
+release:
+  github:
+    overwrite: true
+    changelog:
+      formatted: ALWAYS
+      preset: conventional-commits
+      contributors:
+        format: '- {{contributorName}}{{#contributorUsernameAsLink}} ({{.}}){{/contributorUsernameAsLink}}'
+
+assemble:
+  jlink:
+    chipubapp:
+      active: ALWAYS
+      imageName: '{{distributionName}}-{{projectVersion}}'
+      targetJdks:
+        - path: '{{jdkPathPrefix}}/zulu17OsxIntel/{{jdkFilePrefix}}-macosx_x64/zulu-17.jdk/Contents/Home'
+          platform: 'osx-x86_64'
+        - path: '{{jdkPathPrefix}}/zulu17OsxArm/{{jdkFilePrefix}}-macosx_aarch64/zulu-17.jdk/Contents/Home'
+          platform: 'osx-aarch_64'
+        - path: '{{jdkPathPrefix}}/zulu17LinuxIntel/{{jdkFilePrefix}}-linux_x64'
+          platform: 'linux-x86_64'
+        - path: '{{jdkPathPrefix}}/zulu17LinuxMuslIntel/{{jdkFilePrefix}}-linux_musl_x64'
+          platform: 'linux_musl-x86_64'
+        - path: '{{jdkPathPrefix}}/zulu17LinuxArm/{{jdkFilePrefix}}-linux_aarch64'
+          platform: 'linux-aarch_64'
+        - path: '{{jdkPathPrefix}}/zulu17WindowsIntel/{{jdkFilePrefix}}-win_x64'
+          platform: 'windows-x86_64'
+        - path: '{{jdkPathPrefix}}/zulu17WindowsArm/{{jdkFilePrefix}}-win_aarch64'
+          platform: 'windows-aarch_64'
+      mainJar:
+        path: 'target/{{distributionName}}-{{projectVersion}}.jar'
