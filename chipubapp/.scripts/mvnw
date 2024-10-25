@@ -165,6 +165,7 @@ concat_lines() {
 }
 
 BASE_DIR=$(find_maven_basedir "$(dirname $0)")
+echo "working w/ BASE_DIR of $BASE_DIR"
 if [ -z "$BASE_DIR" ]; then
   exit 1;
 fi
