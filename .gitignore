@@ -35,6 +35,7 @@ bin/
 build/
 /bin1/
 java/build/**
+out/
 
 # NPM
 node_modules/
