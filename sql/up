@@ -5,5 +5,5 @@ cd "$(dirname "$0")"
 
 docker compose up -d
 # give mysql time to start
-sleep 30s
+sleep 60s
 docker exec sql-db-1 /var/src/up.sh

@@ -2,7 +2,7 @@ package org.iitcs.database;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.iitcs.util.PropertiesManager;
+import org.iitcs.util.PropertiesLoader;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -12,25 +12,25 @@ import org.iitcs.util.Constants.CRUD;
 
 import static org.iitcs.util.Constants.QUERY_KEYS;
 
-public class QueriesManager {
-    private static final Logger LOGGER = LogManager.getLogger(QueriesManager.class);
+public class QueryLoader {
+    private static final Logger LOGGER = LogManager.getLogger(QueryLoader.class);
     private Constants c;
     private final Properties queries = new Properties();
-    private static QueriesManager instance;
+    private static QueryLoader instance;
 
     /**
      * QueriesManager is a singleton.
      * Use getInstance() to access global properties
      */
-    public static synchronized QueriesManager getInstance(){
+    public static synchronized QueryLoader getInstance(){
         if(instance != null){
             return instance;
         }
-        return new QueriesManager();
+        return new QueryLoader();
     }
-    private QueriesManager(){
+    private QueryLoader(){
         try{
-            this.queries.load(PropertiesManager.class.getResourceAsStream(c.QUERY_PROPERTIES_FILE));
+            this.queries.load(PropertiesLoader.class.getResourceAsStream(c.QUERY_PROPERTIES_FILE));
         }
         catch(IOException e){
             LOGGER.error(e.getMessage());

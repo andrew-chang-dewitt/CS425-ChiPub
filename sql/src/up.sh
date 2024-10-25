@@ -32,3 +32,4 @@ done
 
 mysql -ppass sys < util_data.sql
 mysql -ppass sys < util_func.sql
+mysql -ppass sys < cardholder_copy_nulloutzerodatetimefields.sql

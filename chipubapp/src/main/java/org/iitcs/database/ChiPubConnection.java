@@ -2,7 +2,6 @@ package org.iitcs.database;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.iitcs.util.PropertiesManager;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -23,7 +22,9 @@ public class ChiPubConnection {
             LOGGER.info("Connecting to schema: ".concat(ps.toString()));
             ps.execute();
         }catch(SQLException e){
+            System.out.println("Connection to database failed. Check your properties file.");
             LOGGER.error(e.getMessage());
+            System.exit(1);
         }
     }
     public Connection getChiPubConnectionObj(){

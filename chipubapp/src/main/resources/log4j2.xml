@@ -2,10 +2,10 @@
 <Configuration status="INFO">
     <Appenders>
 
-        <Console name="Console"
+       <!-- <Console name="Console"
                  target="SYSTEM_OUT">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
-        </Console>
+        </Console>-->
 
         <File name           ="MyFile"
               fileName       ="latest_log.log"
@@ -18,7 +18,7 @@
 
     <Loggers>
         <Root level="all">
-            <AppenderRef ref="Console"/>
+          <!--  <AppenderRef ref="Console"/>-->
             <AppenderRef ref="MyFile"/>
         </Root>
     </Loggers>

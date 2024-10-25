@@ -2,14 +2,11 @@ package org.iitcs.cli;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.jline.consoleui.elements.ConfirmChoice.ConfirmationValue;
-// import org.apache.logging.log4j.Level;
-// import org.apache.logging.log4j.core.config.Configurator;
 import org.jline.consoleui.prompt.ConsolePrompt;
 import org.jline.consoleui.prompt.PromptResultItemIF;
 import org.jline.consoleui.prompt.ConsolePrompt.UiConfig;
@@ -27,16 +24,16 @@ import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Parameters;
-import picocli.CommandLine.ParseResult;
 import picocli.CommandLine.Spec;
 
-import org.iitcs.util.PropertiesManager;
+import org.iitcs.database.QueryExecutor;
+import org.iitcs.util.PropertiesLoader;
 
 /**
  * Encapsulates everything needed to instantiate & execute the CLI program.
  */
 public class Cli {
-    private static PropertiesManager props = PropertiesManager.getInstance();
+    private static PropertiesLoader props = PropertiesLoader.getInstance();
 
     private String[] args;
     private CommandLine cmd;
@@ -80,7 +77,7 @@ public class Cli {
     description = "${bundle:description}",
     version = "${bundle:version}",
     mixinStandardHelpOptions = true,
-    subcommands = {Search.class, View.class}
+    subcommands = {Search.class/*, View.class*/}
 )
 class ChiPub implements Callable<Integer> {
     @Spec CommandSpec spec;
@@ -102,6 +99,8 @@ class ChiPub implements Callable<Integer> {
         this.version = version;
     }
 
+    QueryExecutor qexec = new QueryExecutor();
+    // first, the main function that defers all actions to subcommands
     @Override
     public Integer call() {
         // prompt user with menu if interactive mode isn't disabled
@@ -187,16 +186,17 @@ class ChiPub implements Callable<Integer> {
         @Parameters(index = "0", paramLabel = "<copy id number>") int copyId,
         @Parameters(index = "1", paramLabel = "<member's card number>") int cardholderId
     ) {
-        // TODO...
-        // validate params
-        // then call query from db code
-        // result ?
-        //   on success => return 0?
-        //   else       => handle error ?
-        //     if book already checked out,
-        //     or book subject to pending hold,
-        //     or cardholder has past due books still => return 1  // tell user
-        //     else                                   => return 10 // report unhandled error, maybe code will be something else?
+        switch(qexec.executeCheckOut(copyId, cardholderId)){
+            case(0):
+                System.out.println("Attempted to check-out, but no check-out was found with these parameters.");
+                break;
+            case(1):
+                System.out.println("The copy was successfully checked out!");
+                break;
+            case(-1):
+                System.out.println("Check-out attempt failed.");
+                break;
+        }
     }
 
     // return a book
@@ -205,14 +205,17 @@ class ChiPub implements Callable<Integer> {
         @Parameters(index = "0", paramLabel = "<copy id number>") int copyId,
         @Parameters(index = "1", paramLabel = "<member's card number>") int cardholderId
     ) {
-        // TODO...
-        // validate params
-        // call db code
-        // result ?
-        //   success => return 0
-        //   else    => handle error ?
-        //     book not checked out => return 1  // tell user
-        //     unknown error        => return 10 // unhandled error
+        switch(qexec.executeCheckIn(copyId, cardholderId)){
+            case(0):
+                System.out.println("Attempted to check-in, but no check-out was found with these parameters.");
+                break;
+            case(1):
+                System.out.println("The copy was successfully checked in!");
+                break;
+            case(-1):
+                System.out.println("Check-in attempt failed.");
+                break;
+        }
     }
 
     // request a hold
@@ -236,6 +239,7 @@ class ChiPub implements Callable<Integer> {
 
 @Command(name = "search", description = "Search for...", mixinStandardHelpOptions = true)
 class Search implements Callable<Integer> {
+    QueryExecutor qexec = new QueryExecutor();
     @Spec CommandSpec spec;
 
     // first, the main function that defers all actions to subcommands
@@ -253,29 +257,31 @@ class Search implements Callable<Integer> {
     // search for books
     @Command(name = "book", description = "books by a simple string, or by providing specific values for various properties, such as author, genre, isbn, etc")
     void book(
-        @Parameters(arity = "1..*", paramLabel = "<search terms>") String[] query,
+        // Removing the generic query for now, save time on dev work
+        // @Parameters(arity = "1..*", paramLabel = "<search terms>") String[] query,
         @Option(names = { "-a", "--author" }, description = "narrow search by author") String author,
         @Option(names = { "-g", "--genre" }, description = "narrow search by genre") String genre,
         @Option(names = { "-i", "--isbn" }, description = "narrow search by isbn") String isbn,
         @Option(names = { "-l", "--language" }, description = "narrow search by language") String language,
         @Option(names = { "-s", "--subject" }, description = "narrow search by subject") String subject
     ) {
-        // TODO...
-        System.out.println("searching for query: " + Arrays.toString(query));
+        qexec.executeBookSearch(author, genre, isbn, language, subject);
     };
 
     // search for cardholders
     @Command(name = "cardholder", description = "cardholders by a simple string, or by providing specific values for various properties, such as name, address, phone number, etc.")
     void cardholder(
-        @Parameters(index = "0", paramLabel = "<search terms>") String query,
+        //Removing the generic query for now, save time on dev work
+        //@Parameters(index = "0", paramLabel = "<search terms>") String query,
         @Option(names = { "-a", "--address" }, description = "narrow search by address") String address,
         @Option(names = { "-n", "--name" }, description = "narrow search by name") String name,
         @Option(names = { "-p", "--phone-number" }, description = "narrow search by phone number") String phoneNumber
     ) {
-        // TODO...
+       qexec.executeCardholderSearch(name, address, phoneNumber);
     };
 }
 
+//TODO Will come back to these later!
 @Command(name = "view", description = "View information about...", mixinStandardHelpOptions = true)
 class View implements Callable<Integer> {
     @Spec CommandSpec spec;

@@ -6,9 +6,9 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.util.Properties;
 
-public class PropertiesManager {
-    private static PropertiesManager instance = null;
-    private static final Logger LOGGER = LogManager.getLogger(PropertiesManager.class);
+public class PropertiesLoader {
+    private static PropertiesLoader instance = null;
+    private static final Logger LOGGER = LogManager.getLogger(PropertiesLoader.class);
     private Constants c;
     private final Properties properties = new Properties();
     private String dbJdbcUrl;
@@ -23,16 +23,16 @@ public class PropertiesManager {
      * PropertiesManager is a singleton.
      * Use getInstance() to access global properties
      */
-    public static synchronized PropertiesManager getInstance(){
+    public static synchronized PropertiesLoader getInstance(){
         if(instance != null){
             return instance;
         }
-        return new PropertiesManager();
+        return new PropertiesLoader();
     }
-    private PropertiesManager(){
+    private PropertiesLoader(){
         /*TODO: Should be able to pass a custom properties file in the JVM args*/
         try{
-            this.properties.load(PropertiesManager.class.getResourceAsStream(c.DEFAULT_PROPERTIES_FILE));
+            this.properties.load(PropertiesLoader.class.getResourceAsStream(c.DEFAULT_PROPERTIES_FILE));
             readPropertiesIntoVariables();
         }
         catch(IOException e){
