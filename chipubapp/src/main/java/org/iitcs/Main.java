@@ -3,11 +3,8 @@ package org.iitcs;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.iitcs.cli.Cli;
-import org.iitcs.database.QueryLoader;
 
 import picocli.CommandLine;
-
-import org.iitcs.util.PropertiesLoader;
 
 public class Main {
     private static final Logger LOGGER = LogManager.getLogger(Main.class);

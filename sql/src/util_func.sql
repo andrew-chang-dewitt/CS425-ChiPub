@@ -1,9 +1,9 @@
 use chipub;
 
 
-##################
-#  Stored Procs  #
-##################
+-- ----------------
+-- Stored Procs -- 
+-- ----------------
 
 DELIMITER //
 CREATE PROCEDURE SelectBookBaseIndexes()
@@ -19,10 +19,10 @@ CREATE PROCEDURE SelectBookByAuthorLastName()
 BEGIN
 	CREATE TEMPORARY TABLE IF NOT EXISTS booktempCLI_AuthLName AS
 	SELECT book.bid, author.last_name as author_last_name
-	FROM book 
-	LEFT JOIN author_book ab 
+	FROM book
+	LEFT JOIN author_book ab
 	ON ab.book_id = book.bid
-	INNER JOIN author 
+	INNER JOIN author
 	ON ab.author_id = author.aid;
 END //
 DELIMITER ;
@@ -32,10 +32,10 @@ CREATE PROCEDURE SelectBookByAuthorFirstName()
 BEGIN
 	CREATE TEMPORARY TABLE IF NOT EXISTS booktempCLI_AuthFName AS
 	SELECT book.bid, author.first_name as author_first_name
-	FROM book 
-	LEFT JOIN author_book ab 
+	FROM book
+	LEFT JOIN author_book ab
 	ON ab.book_id = book.bid
-	INNER JOIN author 
+	INNER JOIN author
 	ON ab.author_id = author.aid;
 END //
 DELIMITER ;
@@ -45,8 +45,8 @@ CREATE PROCEDURE SelectBookByGenre()
 BEGIN
 	CREATE TEMPORARY TABLE IF NOT EXISTS booktempCLI_genre AS
 	SELECT book.bid, genre.name as genre
-	FROM book 
-	INNER JOIN genre 
+	FROM book
+	INNER JOIN genre
 	ON book.genre_id = genre.gid;
 END //
 DELIMITER ;
@@ -57,10 +57,10 @@ CREATE PROCEDURE SelectBookBySubject()
 BEGIN
 	CREATE TEMPORARY TABLE IF NOT EXISTS booktempCLI_subject AS
 	SELECT book.bid, subject.name as subject
-	FROM book 
+	FROM book
 	LEFT JOIN subject_book bsubj
 	ON bsubj.book_id = book.bid
-	INNER JOIN subject 
+	INNER JOIN subject
 	ON bsubj.subject_id = subject.sid;
 END //
 DELIMITER ;
@@ -70,10 +70,10 @@ CREATE PROCEDURE SelectBookByLanguage()
 BEGIN
 	CREATE TEMPORARY TABLE IF NOT EXISTS booktempCLI_language AS
 	SELECT book.bid, language.name as language
-	FROM book 
+	FROM book
 	LEFT JOIN language_book blang
 	ON blang.book_id = book.bid
-	INNER JOIN language 
+	INNER JOIN language
 	ON blang.language_id = language.lid;
 END //
 DELIMITER ;
@@ -105,7 +105,7 @@ CREATE PROCEDURE CreateCardholderTableWithPhone()
 BEGIN
 	CREATE TEMPORARY TABLE IF NOT EXISTS cardholdertempCLI_phone AS
 	SELECT card_num, first_name, last_name, addr_num, addr_street, addr_apt, addr_city, addr_state, addr_zip, email, phone_number
-	FROM cardholder 
+	FROM cardholder
 	LEFT JOIN cardholder_phone cp
 	ON cp.cardholder_id = cardholder.chid;
 END //
@@ -118,19 +118,19 @@ BEGIN
 END //
 DELIMITER ;
 
-#Stored proc to check in a book and update its checked_in timestamp
+-- Stored proc to check in a book and update its checked_in timestamp
 DELIMITER //
 CREATE PROCEDURE Check_in(copid int, chid int)
 BEGIN
 	UPDATE cardholder_copy
-		SET checked_in = current_timestamp() 
+		SET checked_in = current_timestamp()
 		WHERE copy_id = copid AND cardholder_id = chid AND checked_in IS NULL;
 END //
 DELIMITER ;
 
-#CALL Check_in(3811930,0);
+-- CALL Check_in(3811930,0);
 
-#Stored proc to check out a book and update its checked_out timestamp
+-- Stored proc to check out a book and update its checked_out timestamp
 DELIMITER //
 CREATE PROCEDURE Check_out(copid int, chid int)
 BEGIN
@@ -140,15 +140,15 @@ BEGIN
 END //
 DELIMITER ;
 
-##TODO! Stored proc to use the copystatus temp table and get available 
-##copies of specific books at specific branches
+-- TODO! Stored proc to use the copystatus temp table and get available
+-- copies of specific books at specific branches
 
-##################
-#  Functions     #
-##################
+-- ----------------
+-- Functions    -- 
+-- ----------------
 
 
-#Function to return the due date-- 2 weeks from the checkout date
+-- Function to return the due date-- 2 weeks from the checkout date
 DELIMITER //
 CREATE FUNCTION calculate_due_date(checkoutdate TIMESTAMP)
 RETURNS TIMESTAMP DETERMINISTIC
@@ -157,4 +157,4 @@ BEGIN
 END//
 DELIMITER ;
 
-#SELECT cardholder_id, calculate_due_date(checked_out) AS due_dates FROM cardholder_copy WHERE checked_in IS NULL;
+-- SELECT cardholder_id, calculate_due_date(checked_out) AS due_dates FROM cardholder_copy WHERE checked_in IS NULL;

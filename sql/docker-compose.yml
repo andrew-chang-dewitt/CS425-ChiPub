@@ -1,9 +1,9 @@
-version: '3.1'
+name: chipubdb
 
 services:
   db:
     image: mysql:8.0
-    command: --secure-file-priv=/var/data
+    command: "--secure-file-priv=/var/data"
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: pass
@@ -16,3 +16,6 @@ services:
       - type: bind
         source: ./data
         target: /var/data
+      - type: bind
+        source: ./conf.d
+        target: /etc/mysql/conf.d

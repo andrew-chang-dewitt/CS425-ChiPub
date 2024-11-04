@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-db=chi_pub
+db=chipub
 
 cd "$(dirname "$0")"
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-db=chi_pub
+db=chipub
 glob=queries/*.sql
 
 cd /var/src/deliverable-3
